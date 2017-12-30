@@ -1,0 +1,35 @@
+Feedforward Program 
+
+
+public class Feedforward {
+
+
+
+public static void main(String[] args) {
+// TODO Auto-generated method stub
+
+
+double input1 = 1.0;
+double input2 = 0.0;
+double weight1 = 10;
+double weight2 = 10;
+double weight3 = -5;
+double weight4 = 5;
+double weight5 = -6;
+double weight6 = -3;
+double weight7 = -6;
+double weight8 = 6;
+double weight9 = -3;
+
+double hiddenLayer1beta = (input1 * weight4) + (input2 * weight5) + weight6;
+double hiddenLayer1Sigmoid = (1/( 1 + Math.pow(Math.E,(-1*hiddenLayer1beta))));
+double hiddenLayer2beta = (input1 * weight7) + (input2 * weight8) + weight9;
+double hiddenLayer2Sigmoid = (1/( 1 + Math.pow(Math.E,(-1*hiddenLayer2beta))));
+double output1beta = ( hiddenLayer1Sigmoid * weight1) + ( hiddenLayer2Sigmoid * weight2) + weight3;
+double outputSigmoid = (1/( 1 + Math.pow(Math.E,(-1*output1beta))));
+System.out.println(outputSigmoid);
+
+
+}
+
+}
