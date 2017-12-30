@@ -1,0 +1,163 @@
+Backpropagation Program 
+package BackPropogation;
+/*
+ * @author Nikhil Kanamarla
+ * @description of program Neural network with the backpropogation algorithm 
+ */
+public class Backpropogation
+{
+    // Important variables that aren't changed
+   final static double momentum = 0.3;
+    final static double bias = 1.0;
+    final static double errorThreshold = 0.05;
+    final static double learningRate = 0.7;
+    
+    // @param is the command line arguments
+    public static void main (String[] args)
+    {
+        double[] trainingXOR = {0,0,0, 0,1,1, 1,0,1, 1,1,0}; // Training data/ideal values for XOR
+         double inputOne = 0; // First input value
+         double inputTwo = 0; // Second input value
+         double error = 0; //The initial error value
+         
+ 
+         double[] deltaWeightsLastIteration = new double[9]; //old delta weights 
+         double[] deltaWeightsPresent = new double[9]; //new delta weights
+ 
+double[] weights = new double [9];
+ 
+         for (int i = 0; i < weights.length; i++)
+         {
+             weights[i] = Math.random()*20 - 10; 
+         }
+         // Initializes random weights (between -10 and 10) in the XOR neural network
+         do
+         {
+             double[] gradients = new double[9]; // batch gradient storage in a array
+             for (int i = 0; i < (trainingXOR.length/3); i++)  
+             {
+              //calculates each node
+                 double inputNode = trainingXOR[3*i]; // First input node 
+                 double inputNode2 = trainingXOR[3*i + 1]; // Second input node
+                 double eOut = trainingXOR[3*i + 2]; // Expected output node
+                 double hiddenOneNodeSum = inputNode*weights[0] + inputNode2*weights[2] + bias*weights[6]; // The sum of the inputs for hidden node one
+                 double hiddenOneNodeOutput = (1/( 1 + Math.pow(Math.E,(-1*hiddenOneNodeSum)))); // Output of hidden node one
+                 double hiddenTwoNodeSum = inputNode*weights[1] + inputNode2*weights[3] + bias*weights[7]; // The sum of the inputs for hidden node two
+                 double hiddenTwoNodeOutput = (1/( 1 + Math.pow(Math.E,(-1*hiddenTwoNodeSum)))); // Output for hidden node two
+                 double outSum = hiddenOneNodeOutput*weights[4] + hiddenTwoNodeOutput*weights[5] + bias*weights[8]; // Sum value for output
+                 double networkOutput = (1/( 1 + Math.pow(Math.E,(-1*outSum)))); //Output value after activation function
+                 
+                 //calculates error and node deltas
+                 double E = networkOutput - eOut; 
+                 double nodeDeltaofOutputLayer = (-1*E)*(1/( 1 + Math.pow(Math.E,(-1*outSum)))) * (1-(1/( 1 + Math.pow(Math.E,(-1*outSum))))); // Node delta of output layer
+                 double hiddenLayerNodeDelta = (weights[4]*nodeDeltaofOutputLayer)*(1/( 1 + Math.pow(Math.E,(-1*hiddenOneNodeSum)))) * (1-(1/( 1 + Math.pow(Math.E,(-1*hiddenOneNodeSum))))); // Node delta of hidden layer one
+                 double hiddenLayerNodeDeltaTwo = (weights[5]*nodeDeltaofOutputLayer)*(1/( 1 + Math.pow(Math.E,(-1*hiddenTwoNodeSum)))) * (1-(1/( 1 + Math.pow(Math.E,(-1*hiddenTwoNodeSum))))); // Node delta of hidden layer one
+                 double[] betaGraident = new double[9]; //array to store the gradients for the data point
+                 //Gradient calc
+                 betaGraident[0] = hiddenLayerNodeDelta*inputNode; betaGraident[1] = hiddenLayerNodeDeltaTwo*inputNode;
+                 betaGraident[2] = hiddenLayerNodeDelta*inputNode2; betaGraident[3] = hiddenLayerNodeDeltaTwo*inputNode2;
+                 betaGraident[4] = nodeDeltaofOutputLayer*hiddenOneNodeOutput; betaGraident[5] = nodeDeltaofOutputLayer*hiddenTwoNodeOutput;
+                 betaGraident[6] = hiddenLayerNodeDelta*bias; betaGraident[7] = hiddenLayerNodeDeltaTwo*bias; 
+                 betaGraident[8] = nodeDeltaofOutputLayer*bias;
+                 
+                 //Put gradients into an array for easy accessibility
+                 for (int l = 0; l < betaGraident.length; l++)
+                 {
+                     gradients[l] = gradients[l] + betaGraident[l];
+                 }
+             }
+             // calculate the weight deltas
+ 
+             for (int i = 0; i < weights.length; i++)
+             {
+             deltaWeightsPresent[i] = (learningRate*gradients[i]) + (momentum*deltaWeightsLastIteration[i]); // Calculates the delta weights
+             weights[i] = weights[i] + (deltaWeightsPresent[i]); // Updates weights in NN
+             }
+             deltaWeightsLastIteration = deltaWeightsPresent;
+             deltaWeightsPresent = new double[9]; // Refreshes delta weights for next iteration
+             
+            double[] realValue = new double[4]; // Actual values for the network
+            double[] errors = new double[4]; // Calculate error value
+            double error2 = 0;
+            for (int i = 0; i < (trainingXOR.length/3); i++)
+            {
+               double inputNode = trainingXOR[3*i]; // First input value
+               double inputNode2 = trainingXOR[3*i + 1]; // Second input value
+               double desired = trainingXOR[3*i + 2]; // ideal value
+              
+               double hiddenOneNodeSum = inputNode*weights[0] + inputNode2*weights[2] + bias*weights[6]; // hidden one node sum
+               double hiddenOneNodeOutput = (1/( 1 + Math.pow(Math.E,(-1*hiddenOneNodeSum)))); // hidden one node output after activation function
+               double hiddenTwoNodeSum = inputNode*weights[1] + inputNode2*weights[3] + bias*weights[7]; // hidden two node sum
+               double hiddenTwoNodeOutput = (1/( 1 + Math.pow(Math.E,(-1*hiddenTwoNodeSum)))); // hidden two node output after activation function
+               double outSum = hiddenOneNodeOutput*weights[4] + hiddenTwoNodeOutput*weights[5] + bias*weights[8]; // output node sum
+               double networkOutput = (1/( 1 + Math.pow(Math.E,(-1*outSum)))); // output after activation function
+               realValue[i] = networkOutput;
+               errors[i] = desired - realValue[i];
+               errors[i] = errors[i]*errors[i];
+               error2 = error2 + errors[i];
+            }
+            error = error2/errors.length; 
+            System.out.println("Gradients");
+            
+            for (int i = 0; i < gradients.length; i++)
+            {
+                System.out.println(gradients[i]);
+            }
+            System.out.println("Weights");
+            for (int i = 0; i < weights.length; i++)
+            {
+                System.out.println(weights[i]);
+            }
+            // Conditonals to escape the local minima after many hours of testing
+            if (error > 0.16 && error <= 0.17)
+            {
+                weights = new double [9];
+           for (int i = 0; i < weights.length; i++)
+           {
+            weights[i] = Math.random()*20 - 10; 
+           }
+            }
+            else if (error > 0.12 && error <= 0.13)
+            {
+             weights = new double [9];
+                for (int i = 0; i < weights.length; i++)
+                {
+                 weights[i] = Math.random()*20 - 10; 
+                }
+            }
+            else if (error > 0.25 && error <= 0.26)
+            {
+             weights = new double [9];
+                for (int i = 0; i < weights.length; i++)
+                {
+                 weights[i] = Math.random()*20 - 10; 
+                }
+            }
+            else if (error > 0.49 && error <= 0.5)
+            {
+             weights = new double [9];
+                for (int i = 0; i < weights.length; i++)
+                {
+                 weights[i] = Math.random()*20 - 10; 
+                }
+            }
+            
+         } while (error > errorThreshold);
+         System.out.println("Final Output"); 
+         double hiddenOneNodeSum = inputOne*weights[0] + inputTwo*weights[2] + bias*weights[6]; // Sum value for hidden one
+         double hiddenOneNodeOutput = (1/( 1 + Math.pow(Math.E,(-1*hiddenOneNodeSum)))); // Output of hidden one
+         double hiddenTwoNodeSum = inputOne*weights[1] + inputTwo*weights[3] + bias*weights[7]; // Sum value for hidden two
+         double hiddenTwoNodeOutput = (1/( 1 + Math.pow(Math.E,(-1*hiddenTwoNodeSum)))); // Output for hidden two
+         double outSum = hiddenOneNodeOutput*weights[4] + hiddenTwoNodeOutput*weights[5] + bias*weights[8]; // Sum value for output
+         double networkOutput = (1/( 1 + Math.pow(Math.E,(-1*outSum))));
+         
+         System.out.println(networkOutput);
+         System.out.println("Final Weight");
+         for (int i = 0; i < weights.length; i++)
+         {
+             System.out.println(weights[i]);
+         }
+        
+    } 
+}
+
