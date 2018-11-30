@@ -1,0 +1,234 @@
+package BackPropogation;
+
+
+/**
+ * Description: Read a file with 2-dimensions of data points, sorted into classes. 
+ * Ask the user for data points and use Gaussian Naive Bayes to calculate probabiliites that the point is in a given class. 
+ * 
+ * @author Nikhil Kanamarla 
+ * @version 1.0
+ */
+import java.util.*;
+import java.io.*;
+
+
+public class NaiveBayes
+{
+    public static void main(String args[]) {
+    	//Series of array lists to store data from txt file
+    	
+    	ArrayList<Double> class0 = new ArrayList<Double>();
+    	ArrayList<Double> class1 = new ArrayList<Double>();
+        ArrayList<Double> class2 = new ArrayList<Double>();
+        
+        
+        //Many variables for caclulations 
+        double class0averagebeta = 0; double class1averagebeta = 0; double class2averagebeta = 0;
+        double class0averagealpha; double class1averagealpha; double class2averagealpha;
+        double class0variancebeta = 0; double class1variancebeta = 0; double class2variancebeta = 0;
+        double class0variancealpha; double class1variancealpha; double class2variancealpha;
+        double class0averagebeta2 = 0; double class1averagebeta2 = 0; double class2averagebeta2 = 0;
+        double class0averagealpha2; double class1averagealpha2; double class2averagealpha2; 
+        double class0variancebeta2 = 0; double class1variancebeta2 = 0;     double class2variancebeta2 = 0;
+        double class0variancealpha2;    double class1variancealpha2; double class2variancealpha2;
+        
+    	// Try/catch 
+        try {
+        	
+        	//Scanner to read file     	
+        Scanner reader = new Scanner(new BufferedReader(new FileReader("data.txt")));
+        
+        
+        //Sorting of data in the file into class 0
+        while (reader.hasNext()) {
+        	while(reader.nextDouble() == 0.0) {
+        		class0.add(reader.nextDouble());
+        		class0.add(reader.nextDouble());
+        	
+        	}
+        }
+       
+        reader.close();
+        
+        //Sorting of data in the file into class 1
+        reader = new Scanner(new BufferedReader(new FileReader("data.txt")));
+      while (reader.hasNext()) {
+        while(reader.nextDouble() == 1.0) {
+        		class1.add(reader.nextDouble());
+        		class1.add(reader.nextDouble());
+        	
+        		
+        	   
+        	}
+        }
+        
+        reader.close();
+        //Sorting of data in the file into class 2
+        
+        reader = new Scanner(new BufferedReader(new FileReader("data.txt")));
+        while (reader.hasNext()) {
+        	while(reader.nextDouble() == 2.0) {
+        		class2.add(reader.nextDouble());
+        		class2.add(reader.nextDouble());
+        
+  
+        	   
+        	}
+        }
+        reader.close();
+        reader = null;
+        
+        } catch (Exception e){ 
+            System.out.println(e.getMessage());
+        }
+        
+      // Separation of classes into X and Y
+      double [] class0X = new double [class0.size()];
+      double [] class0Y = new double [class0.size()];
+      double [] class1X = new double [class0.size()];
+      double [] class1Y = new double [class0.size()];
+      double [] class2X = new double [class0.size()];
+      double [] class2Y = new double [class0.size()];
+      
+        for (int i = 0; i < class0.size(); i+=2) {
+        	 class0X [i] = class0.get(i);
+
+        }
+        
+        for (int i = 1; i < class0.size(); i+=2) {
+       	 class0Y [i] = class0.get(i);
+    	
+       }
+        for (int i = 0; i < class1.size(); i+=2) {
+       	 class1X [i] = class1.get(i);
+    
+       			 
+       }
+        for (int i = 1; i < class1.size(); i+=2) {
+       	 class1Y [i] = class1.get(i);
+
+       }
+        for (int i = 0; i < class2.size(); i+=2) {
+       	 class2X [i] = class2.get(i);
+
+       }
+        for (int i = 1; i < class2.size(); i+=2) {
+       	 class2Y [i] = class2.get(i);
+       	 
+    	
+       }
+        
+        //Scanner for user input
+    Scanner userInputX = new Scanner (System.in);
+    System.out.println("Give x value");
+    double x = userInputX.nextDouble();
+     Scanner userInputY = new Scanner (System.in);
+     System.out.println("Give y value");
+     double y = userInputY.nextDouble();
+     
+     
+     
+     //code for calculating average for X for class 0,1,2
+     
+     for (int i = 0; i < class0.size(); i+=2) {
+    	 class0averagebeta =  class0X [i] +  class0X [i+=2];
+
+    	 System.out.println(class0averagebeta);
+     }
+     
+     class0averagealpha = class0averagebeta/class0.size();
+    		 
+     for (int i = 0; i < class1.size()-1; i+=2) {
+    	 class1averagebeta = class1X [i] + class1X [i+=2];
+    	 System.out.println(class1averagebeta);
+     }
+     
+     class1averagealpha =  class1averagebeta/class1.size();
+     
+     for (int i = 0; i < class2.size(); i+=2) {
+    	 class2averagebeta = class2X [i] + class2X [i+=2];
+    	 System.out.println(class2averagebeta);
+     }
+     class2averagealpha = class2averagebeta/class2.size();
+
+     //code for calculating variance for X for class 0,1,2
+     
+     for (int i = 0;i < class0.size(); i+=2) {
+    	 class0variancebeta = Math.pow( class0X [i] - class0averagealpha, 2);
+    	 System.out.println( class0variancebeta);
+     }
+     
+     for (int i = 0; i < class1.size(); i+=2 ) {
+    	 class1variancebeta = Math.pow( class1X [i] - class1averagealpha, 2);
+    	 System.out.println( class1variancebeta); 
+     }
+     
+     for (int i = 0;i < class2.size(); i+=2 ) {
+    	 class2variancebeta = Math.pow( class2X [i] - class2averagealpha, 2);
+    	 System.out.println( class2variancebeta);
+     }
+     
+      class0variancealpha = class0variancebeta/class0.size() -1; 
+     class1variancealpha = class1variancebeta/class1.size() -1; 
+      class2variancealpha = class2variancebeta/class2.size() -1; 
+      
+      //Calculating gaussian naive bayes for X 
+     
+    double class0XGaussian = Math.pow(1/Math.sqrt(2*Math.PI*class0variancealpha), Math.pow(-(x-class0averagealpha),2)/2*class0variancealpha);
+    System.out.println(class0XGaussian);
+    double class1XGaussian = Math.pow(1/Math.sqrt(2*Math.PI*class1variancealpha), Math.pow(-(x-class1averagealpha),2)/2*class1variancealpha);
+    double class2XGaussian = Math.pow(1/Math.sqrt(2*Math.PI*class2variancealpha), Math.pow(-(x-class2averagealpha),2)/2*class2variancealpha);
+     
+    
+  //code for calculating average for X for class 0,1,2
+
+    for (int i = 1; i < class0.size(); i+=2) {
+   	 class0averagebeta2 =  class0Y [i] +  class0Y [i+=2];
+    }
+    
+    class0averagealpha2 = class0averagebeta2/class0.size();
+   		 
+    for (int i = 1; i < class1.size(); i+=2) {
+   	 class1averagebeta2 = class1Y [i] + class1Y [i+=2];
+    }
+    
+    class1averagealpha2 =  class1averagebeta2/class1.size();
+    
+    for (int i = 1; i < class2.size(); i+=2) {
+   	 class2averagebeta2 = class2Y [i] + class2Y [i+=2];
+    }
+    class2averagealpha2 = class2averagebeta2/class2.size();
+
+  //code for calculating variance for X for class 0,1,2
+    for (int i = 1;i < class0.size(); i+=2) {
+   	 class0variancebeta2 = Math.pow( class0Y [i] - class0averagealpha2, 2);
+    }
+    
+    for (int i = 1; i < class1.size(); i+=2 ) {
+   	 class1variancebeta2 = Math.pow( class1Y [i] - class1averagealpha2, 2);
+    }
+    
+    for (int i = 1;i < class2.size(); i+=2 ) {
+   	 class2variancebeta2 = Math.pow( class2Y [i] - class2averagealpha2, 2);
+    }
+    
+     class0variancealpha2 = class0variancebeta2/class0.size() -1; 
+    class1variancealpha2 = class1variancebeta2/class1.size() -1; 
+     class2variancealpha2 = class2variancebeta2/class2.size() -1; 
+    
+     //Calculating gaussian naive bayes for X 
+   double class0YGaussian = Math.pow(1/Math.sqrt(2*Math.PI*class0variancealpha), Math.pow(-(y-class0averagealpha2),2)/2*class0variancealpha2);
+   System.out.println(class0YGaussian);
+   double class1YGaussian = Math.pow(1/Math.sqrt(2*Math.PI*class1variancealpha), Math.pow(-(y-class1averagealpha2),2)/2*class1variancealpha2);
+   double class2YGaussian = Math.pow(1/Math.sqrt(2*Math.PI*class2variancealpha), Math.pow(-(y-class2averagealpha2),2)/2*class2variancealpha2);
+    
+   //Combining the multiple dimensions
+    double class0calc = (class0.size()/class0.size() + class1.size() + class2.size()) * class0YGaussian * class0XGaussian;
+    System.out.println("Class 0 probability " + class0calc);
+    
+    double class1calc = (class1.size()/class0.size() + class1.size() + class2.size()) *  class1YGaussian * class1XGaussian;
+    System.out.println("Class 1 probability " + class1calc);
+    double class2calc = (class2.size()/class0.size() + class1.size() + class2.size()) *  class2YGaussian * class2XGaussian;
+    System.out.println("Class 2 probability " + class2calc);
+    }
+}
