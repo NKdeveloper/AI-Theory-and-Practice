@@ -1,0 +1,189 @@
+package BackPropogation;
+/*
+ * @author: Nikhil Kanamarla
+ * @description: Neural network using backpropogation 
+ */
+public class NeuralNetwork
+{
+
+    // Important variables 
+    final static double bias = 1.0;
+    final static double errorThreshold = 0.001;
+    final static double e = 2.71828; //check this
+    final static double learningRate = 0.7;
+    final static double momentum = 0.8;
+
+    
+    // @param: Command Line Arguments
+    public static void main (String[] args)
+    {
+        double[] trainingXOR = {0,0,0, 0,1,1, 1,0,1, 1,1,0}; // Training XOR data
+        double inputOne = 1.0; // First input node value
+        double inputTwo = 1.0; // Second input node value
+        double[] w = generateRands(9); // These are all of the weights
+         
+         double error = 0; //default error value
+         double[] deltaWeightsOld = new double[9]; //Old delta weights
+         double[] deltaWeightsCurrent = new double[9]; //new  delta weights 
+         
+         while (error > errorThreshold)
+         {
+             double[] gradients = new double[9]; // store batch gradients the weights
+             for (int i = 0; i < (trainingXOR.length/3); i++) // This loops through the training data to calculate node deltas and gradients
+             {
+                 double iOne = trainingXOR[3*i]; // First input node value
+                 double iTwo = trainingXOR[3*i + 1]; // Second input node value
+                 double eOut = trainingXOR[3*i + 2]; // Expected output value
+                 
+                 double hOneSum = iOne*w[0] + iTwo*w[2] + bias*w[6]; // Sum value for hidden one
+                 double hOneOut = sigmoid(hOneSum); // Output of hidden one
+                 double hTwoSum = iOne*w[1] + iTwo*w[3] + bias*w[7]; // Sum value for hidden two
+                 double hTwoOut = sigmoid(hTwoSum); // Output for hidden two
+                 
+                 double outSum = hOneOut*w[4] + hTwoOut*w[5] + bias*w[8]; // Sum value for output
+                 double networkOutput = sigmoid(outSum);
+                 
+                 double E = networkOutput - eOut; // Error Calculation
+                 double outND = (-1*E)*sigmoidPrime(outSum); // This is the output layer node delta
+                 
+                 double hOneND = (w[4]*outND)*sigmoidPrime(hOneSum); // Hidden one node delta
+                 double hTwoND = (w[5]*outND)*sigmoidPrime(hTwoSum); // Hidden two node delta
+                 
+                 double[] g = new double[9]; // initializes an array to store the gradients for this data point
+                 //Gradient calculations
+                 g[0] = hOneND*iOne; 
+                 g[1] = hTwoND*iOne;
+                 g[2] = hOneND*iTwo; 
+                 g[3] = hTwoND*iTwo;
+                 g[4] = outND*hOneOut; 
+                 g[5] = outND*hTwoOut;
+                 g[6] = hOneND*bias; 
+                 g[7] = hTwoND*bias; 
+                 g[8] = outND*bias;
+                 
+                 //Now to add these gradients into the gradients array
+                 
+                 for (int l = 0; l < g.length; l++)
+                 {
+                     gradients[l] = gradients[l] + g[l];
+                 }
+                 
+             }
+             // Now we have a batch gradient. Lets calculate the weight deltas
+
+             for (int i = 0; i < w.length; i++)
+             {
+                 deltaWeightsCurrent[i] = (learningRate*gradients[i]) + (momentum*deltaWeightsOld[i]); // Calculates delta weights
+                 w[i] = w[i] + (deltaWeightsCurrent[i]); // Updates weights
+             }
+             deltaWeightsOld = deltaWeightsCurrent;
+             deltaWeightsCurrent = new double[9]; // Refreshes delta weights
+             
+            double[] actuals = new double[4]; // Actual values for the network
+            double[] errors = new double[4]; // Errors (Actual - desired)
+            double errorAcc = 0;
+            for (int i = 0; i < (trainingXOR.length/3); i++)
+            {
+               double iOne = trainingXOR[3*i]; // First input neuron value
+               double iTwo = trainingXOR[3*i + 1]; // Second input neuron value
+               double desired = trainingXOR[3*i + 2];
+               
+               double hOneSum = iOne*w[0] + iTwo*w[2] + bias*w[6]; // Sum value for hidden one
+               double hOneOut = sigmoid(hOneSum); // Output of hidden one
+               double hTwoSum = iOne*w[1] + iTwo*w[3] + bias*w[7]; // Sum value for hidden two
+               double hTwoOut = sigmoid(hTwoSum); // Output for hidden two
+                 
+               double outSum = hOneOut*w[4] + hTwoOut*w[5] + bias*w[8]; // Sum value for output
+               double networkOutput = sigmoid(outSum);
+               
+               actuals[i] = networkOutput;
+ 
+               errors[i] = desired - actuals[i];
+               
+               errors[i] = errors[i]*errors[i];
+               
+               errorAcc = errorAcc + errors[i];
+            }
+            error = errorAcc/errors.length;
+            System.out.println("Gradients:");
+             printDoubleArray(gradients, "g"); 
+             System.out.println("Weights:");
+             printDoubleArray(w, "w");
+           
+           // This block escapes a number of local minima that I found the code falling into. Works better than momentum!
+           if (error > 0.125 && error <= 0.1251)
+           {
+               w = generateRands(9);
+           }
+           else if (error > 0.166 && error <= 0.1667)
+           {
+               w = generateRands(9);
+           }
+           else if (error > 0.499 && error <= 0.4999999999)
+           {
+               w = generateRands(9);
+           }
+           else if (error > 0.25 && error <= 0.2501)
+           {
+               w = generateRands(9);
+           }
+            
+         }
+         System.out.println("Final Output");
+               
+         double hOneSum = inputOne*w[0] + inputTwo*w[2] + bias*w[6]; // Sum value for hidden one
+         double hOneOut = sigmoid(hOneSum); // Output of hidden one
+         double hTwoSum = inputOne*w[1] + inputTwo*w[3] + bias*w[7]; // Sum value for hidden two
+         double hTwoOut = sigmoid(hTwoSum); // Output for hidden two
+                 
+         double outSum = hOneOut*w[4] + hTwoOut*w[5] + bias*w[8]; // Sum value for output
+         double networkOutput = sigmoid(outSum);
+         
+         System.out.println(networkOutput);
+         System.out.println("Final Weights");
+         printDoubleArray(w,"");
+        
+    }
+    
+    /*
+     * @param double[] array -- an array of doubles to be printed out to the console
+     */
+    public static void printDoubleArray(double[] array, String ID)
+    {
+        for (int i = 0; i < array.length; i++)
+        {
+            System.out.println(array[i] + ID);
+        }
+    }
+     
+    /*
+     * @param int numRands -- the number of random numbers you wish to generate in the range of -10,10
+     */
+    public static double[] generateRands (int numRands)
+    {
+         double[] ret = new double[numRands];
+         for (int i = 0; i < numRands; i++)
+         {
+             ret[i] = Math.random()*20 - 10; // Change the 20 and the -10 to modify the range of rands
+         }
+         return ret;
+    }
+     
+    /*
+     * @param double in -- the number you are inputing into the sigmoid function
+     */
+    public static double sigmoid (double in)
+    {
+        double outReciprocal = 1 + Math.pow(e,(-1*in));
+        return 1/outReciprocal;
+    }
+    
+    /*
+     * @param double in -- the number you are inputing into the derivative of the sigmoid function
+     */
+    public static double sigmoidPrime (double in)
+    {
+        return sigmoid(in)*(1 - sigmoid(in));
+    }
+    
+}
